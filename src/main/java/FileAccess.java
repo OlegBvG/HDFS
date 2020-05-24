@@ -40,7 +40,7 @@ public class FileAccess  {
      *
      * @param path
      */
-    public static void create(String path, FileSystem hdfs) throws IOException {
+    public  void create(String path, FileSystem hdfs) throws IOException {
         Path file = new Path(path);
         hdfs.create(file).close();
     }
@@ -51,7 +51,7 @@ public class FileAccess  {
      * @param path
      * @param content
      */
-    public static void append(String path, String content, FileSystem hdfs ) throws IOException {
+    public  void append(String path, String content, FileSystem hdfs ) throws IOException {
         Path file = new Path(path);
         OutputStream os = hdfs.append(file);
         BufferedWriter br = new BufferedWriter(
@@ -71,7 +71,7 @@ public class FileAccess  {
      * @param path
      * @return
      */
-    public static String read(String path, FileSystem hdfs) throws IOException {
+    public  String read(String path, FileSystem hdfs) throws IOException {
         Path file = new Path(path);
 
         FSDataInputStream inputStream = hdfs.open(file);
@@ -96,7 +96,7 @@ public class FileAccess  {
      *
      * @param path
      */
-    public static void delete(String path, FileSystem hdfs) throws IOException {
+    public  void delete(String path, FileSystem hdfs) throws IOException {
         Path file = new Path(path);
         if (hdfs.exists(file)) {
             hdfs.delete(file, true);
@@ -109,7 +109,7 @@ public class FileAccess  {
      * @param path
      * @return
      */
-    public static boolean isDirectory(String path, FileSystem hdfs) throws IOException {
+    public  boolean isDirectory(String path, FileSystem hdfs) throws IOException {
         Path file = new Path(path);
         boolean isDir = false;
         if (hdfs.isDirectory(file)) isDir = true;
@@ -124,7 +124,7 @@ public class FileAccess  {
      * @param path
      * @return
      */
-    public static List<String> list(String path, FileSystem hdfs)
+    public  List<String> list(String path, FileSystem hdfs)
     {
         boolean recursive = true;
             List<String> list = new ArrayList<String>();
