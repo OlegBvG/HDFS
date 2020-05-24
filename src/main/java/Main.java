@@ -4,39 +4,38 @@ import org.apache.hadoop.fs.Path;
 public class Main
 {
     private static String symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static String rootPath;
-    protected static FileSystem hdfs;
+
 
 
     public static void main(String[] args) throws Exception
     {
-         String nameContainer = "54748e3fdfa5";
+         String nameContainer = "1d4bb94a9807";
          String rootPath = "hdfs://" + nameContainer + ":8020";
          String filePath = "hdfs://" + nameContainer + ":8020/test/file.txt";
          String filePath2 = "hdfs://" + nameContainer + ":8020/test/double/file2.txt";
          String filePathForScan = "hdfs://" + nameContainer + ":8020/test";
+        FileSystem hdfsMain;
 
-        hdfs = FileAccess.fileAccess(rootPath);
+        FileAccess fileAccess = new  FileAccess(rootPath);
+        hdfsMain = fileAccess.getHdfs();
 
         Path file = new Path(filePath);
 
-        if (hdfs.exists(file)) {
-            FileAccess.delete(filePath);
-        }
+        if (hdfsMain.exists(file)) fileAccess.delete(filePath, hdfsMain);
 
-        FileAccess.create(filePath);
-        FileAccess.create(filePath2);
+        fileAccess.create(filePath, hdfsMain);
+        fileAccess.create(filePath2, hdfsMain);
 
-        FileAccess.append(filePath, "Hello");
+        fileAccess.append(filePath, "Hello", hdfsMain);
 
-        System.out.println("Содержимое файла: " + FileAccess.read(filePath));
+        System.out.println("Содержимое файла: " + fileAccess.read(filePath, hdfsMain));
 
         System.out.print(filePath + " является: ");
-        System.out.println(FileAccess.isDirectory(filePath)?"Директорией":"Файлом");
+        System.out.println(fileAccess.isDirectory(filePath, hdfsMain)?"Директорией":"Файлом");
 
-        System.out.println("list of files and subdirectories: " + FileAccess.list(filePathForScan));
+        System.out.println("list of files and subdirectories: " + fileAccess.list(filePathForScan, hdfsMain));
 
-        hdfs.close();
+        hdfsMain.close();
     }
 
     static String getRandomWord()

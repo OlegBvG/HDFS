@@ -18,15 +18,21 @@ public class FileAccess  {
      * @param rootPath - the path to the root of HDFS,
      * for example, hdfs://localhost:32771
      */
-    public static FileSystem fileAccess(String rootPath) throws URISyntaxException, IOException {
+    private FileSystem hdfs;
+    private String rootPath;
+
+    public FileAccess(String rootPath) throws URISyntaxException, IOException {
+        this.rootPath = rootPath;
         Configuration configuration = new Configuration();
         configuration.set("dfs.client.use.datanode.hostname", "true");
         System.setProperty("HADOOP_USER_NAME", "root");
 
-        FileSystem hdfsLocal = FileSystem.get(
-                new URI(rootPath), configuration
-        );
-        return hdfsLocal;
+        this.hdfs = FileSystem.get(new URI(rootPath), configuration);
+
+    }
+
+    public FileSystem getHdfs() {
+        return hdfs;
     }
 
     /** V
@@ -34,9 +40,9 @@ public class FileAccess  {
      *
      * @param path
      */
-    public static void create(String path) throws IOException {
+    public static void create(String path, FileSystem hdfs) throws IOException {
         Path file = new Path(path);
-        Main.hdfs.create(file).close();
+        hdfs.create(file).close();
     }
 
     /** V
@@ -45,9 +51,9 @@ public class FileAccess  {
      * @param path
      * @param content
      */
-    public static void append(String path, String content) throws IOException {
+    public static void append(String path, String content, FileSystem hdfs ) throws IOException {
         Path file = new Path(path);
-        OutputStream os = Main.hdfs.append(file);
+        OutputStream os = hdfs.append(file);
         BufferedWriter br = new BufferedWriter(
                 new OutputStreamWriter(os, "UTF-8")
         );
@@ -65,10 +71,10 @@ public class FileAccess  {
      * @param path
      * @return
      */
-    public static String read(String path) throws IOException {
+    public static String read(String path, FileSystem hdfs) throws IOException {
         Path file = new Path(path);
 
-        FSDataInputStream inputStream = Main.hdfs.open(file);
+        FSDataInputStream inputStream = hdfs.open(file);
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String line = null;
@@ -90,10 +96,10 @@ public class FileAccess  {
      *
      * @param path
      */
-    public static void delete(String path) throws IOException {
+    public static void delete(String path, FileSystem hdfs) throws IOException {
         Path file = new Path(path);
-        if (Main.hdfs.exists(file)) {
-            Main.hdfs.delete(file, true);
+        if (hdfs.exists(file)) {
+            hdfs.delete(file, true);
         }
     }
 
@@ -103,11 +109,11 @@ public class FileAccess  {
      * @param path
      * @return
      */
-    public static boolean isDirectory(String path) throws IOException {
+    public static boolean isDirectory(String path, FileSystem hdfs) throws IOException {
         Path file = new Path(path);
         boolean isDir = false;
-        if (Main.hdfs.isDirectory(file)) isDir = true;
-        if (Main.hdfs.isFile(file)) isDir = false;
+        if (hdfs.isDirectory(file)) isDir = true;
+        if (hdfs.isFile(file)) isDir = false;
 
         return isDir;
     }
@@ -118,14 +124,14 @@ public class FileAccess  {
      * @param path
      * @return
      */
-    public static List<String> list(String path)
+    public static List<String> list(String path, FileSystem hdfs)
     {
         boolean recursive = true;
             List<String> list = new ArrayList<String>();
             try
             {
                 Path pathScan = new Path(path);  //throws IllegalArgumentException, all others will only throw IOException
-                pathScan = Main.hdfs.resolvePath(pathScan);
+                pathScan = hdfs.resolvePath(pathScan);
 
                 if (recursive)
                 {
@@ -137,13 +143,13 @@ public class FileAccess  {
                     {
                         Path filePath = fileQueue.remove();
 
-                        if (Main.hdfs.isFile(filePath))
+                        if (hdfs.isFile(filePath))
                         {
                             list.add(filePath.toString());
                         }
                         else
                         {
-                            FileStatus[] fileStatuses = Main.hdfs.listStatus(filePath);
+                            FileStatus[] fileStatuses = hdfs.listStatus(filePath);
                             for (FileStatus fileStatus : fileStatuses)
                             {
                                 fileQueue.add(fileStatus.getPath());
@@ -155,9 +161,9 @@ public class FileAccess  {
                 }
                 else
                 {
-                    if (Main.hdfs.isDirectory(pathScan))
+                    if (hdfs.isDirectory(pathScan))
                     {
-                        FileStatus[] fileStatuses = Main.hdfs.listStatus(pathScan);
+                        FileStatus[] fileStatuses = hdfs.listStatus(pathScan);
 
                         for (FileStatus fileStatus : fileStatuses)
                         {
