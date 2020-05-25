@@ -9,7 +9,7 @@ public class Main
 
     public static void main(String[] args) throws Exception
     {
-         String nameContainer = "1d4bb94a9807";
+         String nameContainer = "7d2b8a536d55";
          String rootPath = "hdfs://" + nameContainer + ":8020";
          String filePath = "hdfs://" + nameContainer + ":8020/test/file.txt";
          String filePath2 = "hdfs://" + nameContainer + ":8020/test/double/file2.txt";
@@ -21,19 +21,19 @@ public class Main
 
         Path file = new Path(filePath);
 
-        if (hdfsMain.exists(file)) fileAccess.delete(filePath, hdfsMain);
+        if (hdfsMain.exists(file)) fileAccess.delete(filePath);
 
-        fileAccess.create(filePath, hdfsMain);
-        fileAccess.create(filePath2, hdfsMain);
+        fileAccess.create(filePath);
+        fileAccess.create(filePath2);
 
-        fileAccess.append(filePath, "Hello", hdfsMain);
+        fileAccess.append(filePath, "Hello");
 
-        System.out.println("Содержимое файла: " + fileAccess.read(filePath, hdfsMain));
+        System.out.println("Содержимое файла: " + fileAccess.read(filePath));
 
         System.out.print(filePath + " является: ");
-        System.out.println(fileAccess.isDirectory(filePath, hdfsMain)?"Директорией":"Файлом");
+        System.out.println(fileAccess.isDirectory(filePath)?"Директорией":"Файлом");
 
-        System.out.println("list of files and subdirectories: " + fileAccess.list(filePathForScan, hdfsMain));
+        System.out.println("list of files and subdirectories: " + fileAccess.list(filePathForScan));
 
         hdfsMain.close();
     }

@@ -40,7 +40,7 @@ public class FileAccess  {
      *
      * @param path
      */
-    public  void create(String path, FileSystem hdfs) throws IOException {
+    public  void create(String path) throws IOException {
         Path file = new Path(path);
         hdfs.create(file).close();
     }
@@ -51,18 +51,25 @@ public class FileAccess  {
      * @param path
      * @param content
      */
-    public  void append(String path, String content, FileSystem hdfs ) throws IOException {
+
+
+    public  void append(String path, String content) {
         Path file = new Path(path);
-        OutputStream os = hdfs.append(file);
-        BufferedWriter br = new BufferedWriter(
-                new OutputStreamWriter(os, "UTF-8")
-        );
+        BufferedWriter br;
+        try (OutputStream os = hdfs.append(file)) {
+            br = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8")
+            );
+
         br.write(content);
 //        for(int i = 0; i < 10_000_000; i++) {
 //            br.write(Main.getRandomWord() + " ");
 //        }
         br.flush();
         br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /** V
@@ -71,22 +78,25 @@ public class FileAccess  {
      * @param path
      * @return
      */
-    public  String read(String path, FileSystem hdfs) throws IOException {
+    public  String read(String path) {
         Path file = new Path(path);
 
-        FSDataInputStream inputStream = hdfs.open(file);
-        BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String line = null;
-        String lineAll = "";
-        while ((line = bufferedReader.readLine()) != null){
-            System.out.println(line);
-            lineAll = lineAll + line;
-        }
+        String lineAll="";
+        try (FSDataInputStream inputStream = hdfs.open(file)) {
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String line = null;
+            while ((line = bufferedReader.readLine()) != null) {
+                System.out.println(line);
+                lineAll = lineAll + line;
+            }
 
 //        String out= IOUtils.toString(inputStream, "UTF-8");
 
-        inputStream.close();
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return lineAll;
 
     }
@@ -96,10 +106,14 @@ public class FileAccess  {
      *
      * @param path
      */
-    public  void delete(String path, FileSystem hdfs) throws IOException {
+    public  void delete(String path) {
         Path file = new Path(path);
-        if (hdfs.exists(file)) {
-            hdfs.delete(file, true);
+        try {
+            if (hdfs.exists(file)) {
+                hdfs.delete(file, true);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -109,7 +123,7 @@ public class FileAccess  {
      * @param path
      * @return
      */
-    public  boolean isDirectory(String path, FileSystem hdfs) throws IOException {
+    public  boolean isDirectory(String path) throws IOException {
         Path file = new Path(path);
         boolean isDir = false;
         if (hdfs.isDirectory(file)) isDir = true;
@@ -124,7 +138,7 @@ public class FileAccess  {
      * @param path
      * @return
      */
-    public  List<String> list(String path, FileSystem hdfs)
+    public  List<String> list(String path)
     {
         boolean recursive = true;
             List<String> list = new ArrayList<String>();
@@ -187,6 +201,5 @@ public class FileAccess  {
             }
             return list;
     }
-//
 
 }
